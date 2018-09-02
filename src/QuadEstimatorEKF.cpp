@@ -107,11 +107,11 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   Mat3x3F R(v);
   
   V3F pqr(gyro.x, gyro.y, gyro.z); //Current gyro measurement vector
-  V3F predicted_attitude = R*pqr; 
+  V3F global_attitude_rate= R*pqr; 
 
-  float predictedPitch = pitchEst + dtIMU * predicted_attitude[1];
-  float predictedRoll = rollEst + dtIMU * predicted_attitude[0];
-  ekfState(6) = ekfState(6) + dtIMU * predicted_attitude[2];	// yaw
+  float predictedPitch = pitchEst + dtIMU * global_attitude_rate[1];
+  float predictedRoll = rollEst + dtIMU * global_attitude_rate[0];
+  ekfState(6) = ekfState(6) + dtIMU * global_attitude_rate[2];	// yaw
 
   // normalize yaw to -pi .. pi
   if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
