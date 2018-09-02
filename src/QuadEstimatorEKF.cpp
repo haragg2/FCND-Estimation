@@ -93,9 +93,25 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   // (replace the code below)
   // make sure you comment it out when you add your own code -- otherwise e.g. you might integrate yaw twice
 
-  float predictedPitch = pitchEst + dtIMU * gyro.y;
-  float predictedRoll = rollEst + dtIMU * gyro.x;
-  ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+  //float predictedPitch = pitchEst + dtIMU * gyro.y;
+  //float predictedRoll = rollEst + dtIMU * gyro.x;
+  //ekfState(6) = ekfState(6) + dtIMU * gyro.z;	// yaw
+
+  //Matrix to convert the body frame gyro measurements to world frame roll, pith, yaw rates
+  //It's values depends on the current attitude estimate
+  float v[9] = {
+    1, sin(rollEst)*tan(pitchEst), cos(rollEst)*tan(pitchEst), 
+    0, cos(rollEst), -sin(rollEst), 
+    0, sin(rollEst)/cos(pitchEst), cos(rollEst)/cos(pitchEst)
+    };
+  Mat3x3F R(v);
+  
+  V3F pqr(gyro.x, gyro.y, gyro.z); //Current gyro measurement vector
+  V3F predicted_attitude = R*pqr; 
+
+  float predictedPitch = pitchEst + dtIMU * predicted_attitude[1];
+  float predictedRoll = rollEst + dtIMU * predicted_attitude[0];
+  ekfState(6) = ekfState(6) + dtIMU * predicted_attitude[2];	// yaw
 
   // normalize yaw to -pi .. pi
   if (ekfState(6) > F_PI) ekfState(6) -= 2.f*F_PI;
@@ -104,6 +120,7 @@ void QuadEstimatorEKF::UpdateFromIMU(V3F accel, V3F gyro)
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   // CALCULATE UPDATE
+  //but this should only be valid if quad is not accelerating
   accelRoll = atan2f(accel.y, accel.z);
   accelPitch = atan2f(-accel.x, 9.81f);
 
