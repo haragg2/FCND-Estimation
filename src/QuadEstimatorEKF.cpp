@@ -3,6 +3,7 @@
 #include "Utility/SimpleConfig.h"
 #include "Utility/StringUtils.h"
 #include "Math/Quaternion.h"
+#include <iostream>
 
 using namespace SLR;
 
@@ -214,6 +215,23 @@ MatrixXf QuadEstimatorEKF::GetRbgPrime(float roll, float pitch, float yaw)
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
 
+  float cos_phi = cos(rollEst);
+  float sin_phi = sin(rollEst);
+
+  float cos_theta = cos(pitchEst);
+  float sin_theta = sin(pitchEst);
+  
+  float sin_psi = sin(ekfState(6));
+  float cos_psi = cos(ekfState(6));
+  
+  RbgPrime(0,0) = - cos_theta * sin_psi;
+  RbgPrime(0,1) = - sin_phi  * sin_theta * sin_psi - cos_theta * cos_psi;
+  RbgPrime(0,2) = - cos_phi  * sin_theta * sin_psi + sin_phi   * cos_psi;
+  
+  RbgPrime(1,0) = cos_theta * cos_psi;
+  RbgPrime(1,1) = sin_phi  * sin_theta * cos_psi - cos_phi * sin_psi;
+  RbgPrime(1,2) = cos_phi * sin_theta * cos_psi + sin_phi * sin_psi;
+
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return RbgPrime;
@@ -258,7 +276,17 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
   gPrime.setIdentity();
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+
+  gPrime(3, 6) = (RbgPrime(0) * accel).sum() * dt;
+  gPrime(4, 6) = (RbgPrime(1) * accel).sum() * dt;
+  gPrime(5, 6) = (RbgPrime(2) * accel).sum() * dt;
+
+  gPrime(0,3) = dt;
+  gPrime(1,4) = dt;
+  gPrime(2,5) = dt;
   
+  ekfCov = gPrime * ekfCov * gPrime.transpose() + Q;
+
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   ekfState = newState;
