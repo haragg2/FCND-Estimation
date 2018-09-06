@@ -178,8 +178,16 @@ VectorXf QuadEstimatorEKF::PredictState(VectorXf curState, float dt, V3F accel, 
   Quaternion<float> attitude = Quaternion<float>::FromEuler123_RPY(rollEst, pitchEst, curState(6));
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
+  V3F accel_I = attitude.Rotate_BtoI(accel); //Change the body frame acceleration to world frame (inertial frame) acceleration
 
-
+  //Position update
+  predictedState[0] += curState[3] * dt;
+  predictedState[1] += curState[4] * dt;
+  predictedState[2] += curState[5] * dt;
+  //Velocity update
+  predictedState[3] += accel_I[0] * dt;
+  predictedState[4] += accel_I[1] * dt;
+  predictedState[5] += (accel_I[2] - CONST_GRAVITY) * dt; //Take care of g in z direction
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   return predictedState;
@@ -205,7 +213,6 @@ MatrixXf QuadEstimatorEKF::GetRbgPrime(float roll, float pitch, float yaw)
   //   that your calculations are reasonable
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
@@ -251,8 +258,7 @@ void QuadEstimatorEKF::Predict(float dt, V3F accel, V3F gyro)
   gPrime.setIdentity();
 
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
-
+  
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
   ekfState = newState;
@@ -297,7 +303,6 @@ void QuadEstimatorEKF::UpdateFromMag(float magYaw)
   //    (you don't want to update your yaw the long way around the circle)
   //  - The magnetomer measurement covariance is available in member variable R_Mag
   ////////////////////////////// BEGIN STUDENT CODE ///////////////////////////
-
 
   /////////////////////////////// END STUDENT CODE ////////////////////////////
 
