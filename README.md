@@ -111,6 +111,7 @@ Up until now we've only used the accelerometer and gyro for our state estimation
 This is a simple step but we make sure to normalize the difference between your measured and estimated yaw (we don't want to update our yaw the long way around the circle)
 
 Finally we tune the parameter `QYawStd` (`QuadEstimatorEKF.txt`) so that it approximately captures the magnitude of the error, as demonstrated here:
+
 ![Yaw](./images/5.gif)
 
 The magnetometer update is implemented at [/src/QuadEstimatorEKF.cpp](./src/QuadEstimatorEKF.cpp#L349-L354) line 349 to line 354. When the scenario is passing the test, you should see this line on the standard output:
@@ -131,7 +132,7 @@ Then we do GPS update uses the following jacobian:
 
 And tune the process noise model `QPosZStd` and the `QVelZStd` in `QuadEstimatorEKF.txt` to try to approximately capture the error you see with the estimated uncertainty (standard deviation) of the filter.
 
-The objective is to complete the entire simulation cycle with estimated position error of < 1m (you’ll see a green box over the bottom graph if you succeed).
+The objective is to complete the entire simulation cycle with estimated position error of < 1m (we’ll see a green box over the bottom graph if we succeed).
 
 ![GPS](./images/6.gif)
 
