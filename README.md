@@ -56,7 +56,7 @@ samples = map(float, data[1:,1])
 print(np.std(samples))
 ```
  
-Once the resulted values are pluged in `MeasuredStdDev_GPSPosXY` and `MeasuredStdDev_AccelXY`into the top of `config/6_Sensornoise.txt` the standard deviation will capture roughlly 8% of the respective measurements (which is what we expect within +/- 1 sigma bound for a Gaussian noise model).
+Once the resulted values are pluged in `MeasuredStdDev_GPSPosXY` and `MeasuredStdDev_AccelXY`into the top of `config/6_Sensornoise.txt` the standard deviation will capture roughlly 68% of the respective measurements (which is what we expect within +/- 1 sigma bound for a Gaussian noise model).
 
 ![Noise](./images/1.gif)
 
@@ -75,6 +75,8 @@ First, we need to find the roll, pitch and yaw derivates using the following non
 Then we will use the Forward Euler Method to get the attitude from the gyro measurement.
 
 ![Forward Euler Method](./images/FEM.png)
+
+The resulted attitude from gyro measurements are then combined with attitude estimate from accelerometer measurements in a complimentary filter. The complimentary filter try to balance by removing the drift from the gyro (high pass filtering the gyro to get short term data) and removing the noise from the accelerometer (low pass filtering the accel to get the long term trend) to get the best performance.
 
 The implementation of this integration is at [/src/QuadEstimatorEKF.cpp](./src/QuadEstimatorEKF.cpp#L103-L115) from line 103 to line 115. The standard output when this scenario passes:
 
